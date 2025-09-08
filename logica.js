@@ -27,28 +27,36 @@ function operacionAleatoria() {
     return { expresion: expresion, resultado: resultado};
 }
 
-fetch(url)
-    .then(response => response.json())
-    .then(data => {
-        console.log('GET response:', data);
-    })
-    .catch(error => console.error('Error fetching data:', error));
 
-const operacion = operacionAleatoria();
-fetch(url, {
-    method: 'POST',
-    headers: {
-        'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({ question: `A cuanto evalua (${operacion.expresion}`, answer: operacion.resultado, correct: false})
-})
-    .then(response => response.json())
-    .then(data => {
-        console.log('POST response:', data);
-    })
-    .catch(error => console.error('Error posting data:', error));
+const API_URL = 'http://localhost:3000/historial';
 
-// Genera 3 opciones incorrectas cercanas al resultado correcto
+// Mostrar historial al cargar
+function mostrarHistorial() {
+    fetch(API_URL)
+        .then(res => res.json())
+        .then(historial => {
+            const historialDiv = document.getElementById('historial');
+            if (historialDiv) {
+                historialDiv.innerHTML = historial.map(item =>
+                    `<div>
+                        <b>${item.pregunta}</b><br>
+                        Tu respuesta: ${item.respuestaUsuario} (${item.correcta ? 'Correcta' : 'Incorrecta'})
+                    </div>`
+                ).join('');
+            }
+        });
+}
+
+// Guardar respuesta en el servidor
+function guardarRespuesta(pregunta, respuestaUsuario, correcta) {
+    fetch(API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ pregunta, respuestaUsuario, correcta })
+    });
+}
+
+
 function generarOpciones(correcto) {
     const opciones = new Set([correcto]);
     while (opciones.size < 4) {
@@ -74,26 +82,35 @@ function mostrarPregunta() {
         opcionesElem.appendChild(document.createElement("br"));
     });
     feedbackElem.textContent = "";
-    // Guardar el resultado correcto para comparar
     opcionesElem.dataset.correcto = operacion.resultado;
 }
 
 document.addEventListener("DOMContentLoaded", () => {
     mostrarPregunta();
+    mostrarHistorial();
     document.getElementById("quizForm").addEventListener("submit", function(e) {
         e.preventDefault();
         const opcionesElem = document.getElementById("opciones");
         const correcto = Number(opcionesElem.dataset.correcto);
         const seleccionada = document.querySelector("input[name='opcion']:checked");
         const feedbackElem = document.getElementById("feedback");
+        const preguntaElem = document.getElementById("pregunta");
         if (seleccionada) {
-            if (Number(seleccionada.value) === correcto) {
+            const esCorrecta = Number(seleccionada.value) === correcto;
+            if (esCorrecta) {
                 feedbackElem.textContent = "¡Correcto!";
                 feedbackElem.style.color = "green";
             } else {
                 feedbackElem.textContent = "Incorrecto. Intenta de nuevo.";
                 feedbackElem.style.color = "red";
             }
+            // Guardar en el historial del servidor
+            guardarRespuesta(
+                preguntaElem.textContent,
+                seleccionada.value,
+                esCorrecta
+            );
+            mostrarHistorial();
         }
     });
 });
