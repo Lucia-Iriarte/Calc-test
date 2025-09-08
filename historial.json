@@ -1,1 +1,12 @@
-[]
+[
+  {
+    "pregunta": "¿A cuánto evalúa (4 * 18)?",
+    "respuestaUsuario": "72",
+    "correcta": true
+  },
+  {
+    "pregunta": "¿A cuánto evalúa (18 - 5)?",
+    "respuestaUsuario": "4",
+    "correcta": false
+  }
+]
