@@ -1,3 +1,10 @@
+// DELETE: Borra el historial
+app.delete('/historial', (req, res) => {
+    fs.writeFile(HISTORIAL_FILE, JSON.stringify([], null, 2), (err) => {
+        if (err) return res.status(500).json({ status: 'error' });
+        res.json({ status: 'borrado' });
+    });
+});
 const express = require('express');
 const fs = require('fs');
 const cors = require('cors');
