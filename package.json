@@ -1,7 +1,9 @@
 {
   "question": "A cuanto evalua (32+179)?",
   "answer": 201,
-  "correct": false
+  "correct": false,
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^5.1.0"
+  }
 }
-
-
